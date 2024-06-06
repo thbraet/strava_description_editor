@@ -30,7 +30,7 @@ def strava():
     # This URL will generate a Strava prompt to approva the app gets access for the specified scope
     # If the user approves, they will get redirected to the redirect_uri, which is the /callback path in this case.
     # If the user already granted access for a specific scope, for a specific client_id, they will not have to authorize again so make sure to store their access token!
-    authorization_url = f"https://www.strava.com/oauth/authorize?client_id={client_id}&redirect_uri={url_for('callback', _external=True)}&response_type=code&scope=read"
+    authorization_url = f"https://www.strava.com/oauth/authorize?client_id={client_id}&redirect_uri={url_for('callback', _external=True)}&response_type=code&scope=read_all,activity:read_all,activity:write"
     
     return render_template('strava.html', authorization_url=authorization_url)
 
@@ -85,9 +85,49 @@ def profile():
     profile_url = 'https://www.strava.com/api/v3/athlete'
     headers = {'Authorization': f'Bearer {access_token}'}
     response = requests.get(profile_url, headers=headers)
+    
+    if response.status_code != 200:
+        return "Failed to retrieve profile information."
+
     profile_data = response.json()
 
     return f"Hello, {profile_data['firstname']} {profile_data['lastname']}!"
+
+
+@app.route('/update_activity', methods=['GET', 'POST'])
+def update_activity():
+    if request.method == 'POST':
+        activity_url = request.form['activity_url']
+        # Extract activity ID from URL
+        activity_id = activity_url.split('/')[-1]
+
+        access_token = session.get('access_token')
+        if not access_token:
+            return redirect(url_for('strava'))
+
+        # Fetch activity details
+        activity_url = f'https://www.strava.com/api/v3/activities/{activity_id}'
+        headers = {'Authorization': f'Bearer {access_token}'}
+        response = requests.get(activity_url, headers=headers)
+
+        if response.status_code != 200:
+            return "Failed to retrieve activity details."
+
+        activity_data = response.json()
+        elevation_gain = activity_data['total_elevation_gain']
+
+        # Update activity description
+        update_url = f'https://www.strava.com/api/v3/activities/{activity_id}'
+        update_payload = {
+            'description': f"Congrats, you covered {elevation_gain} meters!"
+        }
+        response = requests.put(update_url, headers=headers, data=update_payload)
+
+        if response.status_code != 200:
+            return "Failed to update activity description."
+
+        return "Activity description updated successfully!"
+    return render_template('update_activity.html')
 
 
 

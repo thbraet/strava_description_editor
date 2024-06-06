@@ -1,0 +1,16 @@
+<!-- templates/update_activity.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Activity</title>
+</head>
+<body>
+    <h1>Update Strava Activity</h1>
+    <form action="{{ url_for('update_activity') }}" method="post">
+        <label for="activity_url">Strava Activity URL:</label>
+        <input type="text" id="activity_url" name="activity_url" required>
+        <button type="submit">Update Description</button>
+    </form>
+</body>
+</html>
