@@ -40,6 +40,9 @@ def callback():
     # This code can be exchanged for an access token
     code = request.args.get('code')
     
+    if not code:
+        return "Authorization failed."
+    
     
     token_url = 'https://www.strava.com/oauth/token'
     payload = {
