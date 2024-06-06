@@ -1,5 +1,9 @@
 import os
 from flask import Flask, render_template, request, session, url_for, redirect
+from flask_sqlalchemy import SQLAlchemy
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+
 import requests
 
 app = Flask(__name__)
@@ -10,6 +14,25 @@ app.secret_key = os.urandom(23)  # You can also set this to a fixed value for co
 
 client_secret = "18a89f0a7b2034798129851e48a65864b1f21027"
 client_id = 59692
+
+# Configure the SQLite database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///strava_app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize the database
+db = SQLAlchemy(app)
+
+# Define the User model
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    strava_id = db.Column(db.Integer, unique=True, nullable=False)
+    access_token = db.Column(db.String(128), nullable=False)
+    refresh_token = db.Column(db.String(128), nullable=False)
+    expires_at = db.Column(db.Integer, nullable=False)
+
+# Create the database tables
+with app.app_context():
+    db.create_all()
 
 @app.route('/')
 def home():
@@ -69,21 +92,40 @@ def callback():
     # }
     response_data = response.json()
 
-    session['access_token'] = response_data['access_token']
-    session['refresh_token'] = response_data['refresh_token']
-    
-    # Use access token to get information about athlete
+    # Store tokens and other details in the database
+    strava_id = response_data['athlete']['id']
+    user = User.query.filter_by(strava_id=strava_id).first()
+    if not user:
+        user = User(
+            strava_id=strava_id,
+            access_token=response_data['access_token'],
+            refresh_token=response_data['refresh_token'],
+            expires_at=response_data['expires_at']
+        )
+        db.session.add(user)
+    else:
+        user.access_token = response_data['access_token']
+        user.refresh_token = response_data['refresh_token']
+        user.expires_at = response_data['expires_at']
+    db.session.commit()
+
+    session['strava_id'] = strava_id
+
     return redirect(url_for('profile'))
 
 @app.route('/profile')
 def profile():
-    print(session)
-    access_token = session.get('access_token')
-    if not access_token:
-        return redirect(url_for('login'))
+    strava_id = session.get('strava_id')
+    if not strava_id:
+        return redirect(url_for('strava'))
+
+    user = User.query.filter_by(strava_id=strava_id).first()
+    if not user:
+        return redirect(url_for('strava'))
+
+    headers = {'Authorization': f'Bearer {user.access_token}'}
 
     profile_url = 'https://www.strava.com/api/v3/athlete'
-    headers = {'Authorization': f'Bearer {access_token}'}
     response = requests.get(profile_url, headers=headers)
     
     if response.status_code != 200:
@@ -98,16 +140,18 @@ def profile():
 def update_activity():
     if request.method == 'POST':
         activity_url = request.form['activity_url']
-        # Extract activity ID from URL
         activity_id = activity_url.split('/')[-1]
 
-        access_token = session.get('access_token')
-        if not access_token:
+        strava_id = session.get('strava_id')
+        if not strava_id:
             return redirect(url_for('strava'))
 
-        # Fetch activity details
+        user = User.query.filter_by(strava_id=strava_id).first()
+        if not user:
+            return redirect(url_for('strava'))
+
+        headers = {'Authorization': f'Bearer {user.access_token}'}
         activity_url = f'https://www.strava.com/api/v3/activities/{activity_id}'
-        headers = {'Authorization': f'Bearer {access_token}'}
         response = requests.get(activity_url, headers=headers)
 
         if response.status_code != 200:
@@ -116,10 +160,9 @@ def update_activity():
         activity_data = response.json()
         elevation_gain = activity_data['total_elevation_gain']
 
-        # Update activity description
         update_url = f'https://www.strava.com/api/v3/activities/{activity_id}'
         update_payload = {
-            'description': f"Congrats, you covered {elevation_gain} meters!"
+            'description': f"Congrats, you covered {elevation_gain} meters of elevation!"
         }
         response = requests.put(update_url, headers=headers, data=update_payload)
 
@@ -129,7 +172,9 @@ def update_activity():
         return "Activity description updated successfully!"
     return render_template('update_activity.html')
 
-
+# Initialize Flask-Admin
+admin = Admin(app, name='Strava App Admin', template_mode='bootstrap3')
+admin.add_view(ModelView(User, db.session))
 
 if __name__ == '__main__':
     app.run(debug=True)
