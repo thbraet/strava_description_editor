@@ -1,11 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strava Page</title>
-  </head>
-  <body>
-    <h1>Welcome to the Strava Page</h1>
-    <p>This is a placeholder page for Strava data.</p>
-  </body>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Strava Page</h1>
+        <p>This is a placeholder page for Strava data.</p>
+        <!-- Authorization Button -->
+        <a href="{{ authorization_url }}" class="authorize-button">Authorize with Strava</a>
+    </div>
+</body>
 </html>
