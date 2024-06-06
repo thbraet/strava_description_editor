@@ -53,6 +53,9 @@ def callback():
     }
     response = requests.post(token_url, data=payload)
     
+    if response.status_code != 200:
+        return "Failed to retrieve access token."
+    
     # Contains four fields: token_type (Bearer), expires_at, expires_in, refresh_token, access_token, athlete
     #     {
     #   "token_type": "Bearer",
