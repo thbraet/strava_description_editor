@@ -36,7 +36,8 @@ def strava():
 @app.route('/callback')
 def callback():
     print("Callback")
-    print(requests.args)
+    print(requests.args
+)
     code = request.args.get('code')
     print(code)
     token_url = 'https://www.strava.com/oauth/token'
