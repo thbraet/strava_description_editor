@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Update Strava Activity</h1>
-    <form action="{{ url_for('update_activity') }}" method="post">
+    <form action="{{ url_for('main.update_activity') }}" method="post">
         <label for="activity_url">Strava Activity URL:</label>
         <input type="text" id="activity_url" name="activity_url" required>
         <button type="submit">Update Description</button>
