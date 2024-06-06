@@ -5,7 +5,7 @@ import requests
 app = Flask(__name__)
 
 # Set the secret key to some random bytes. Keep this really secret!
-app.secret_key = os.urandom(24)  # You can also set this to a fixed value for consistency
+app.secret_key = os.urandom(23)  # You can also set this to a fixed value for consistency
 
 
 client_secret = "18a89f0a7b2034798129851e48a65864b1f21027"
@@ -29,17 +29,18 @@ def strava():
     # The user will see a button that links to the authorization URL
     # This URL will generate a Strava prompt to approva the app gets access for the specified scope
     # If the user approves, they will get redirected to the redirect_uri, which is the /callback path in this case.
-    authorization_url = f"https://www.strava.com/oauth/authorize?client_id={client_id}&redirect_uri={url_for('callback', _external=True)}&response_type=code&scope=read,activity:read_all"
+    # If the user already granted access for a specific scope, for a specific client_id, they will not have to authorize again so make sure to store their access token!
+    authorization_url = f"https://www.strava.com/oauth/authorize?client_id={client_id}&redirect_uri={url_for('callback', _external=True)}&response_type=code&scope=read"
     
     return render_template('strava.html', authorization_url=authorization_url)
 
 @app.route('/callback')
 def callback():
-    print("Callback")
-    print(requests.args
-)
+    # After authorizing, you will find a code in the URI
+    # This code can be exchanged for an access token
     code = request.args.get('code')
-    print(code)
+    
+    
     token_url = 'https://www.strava.com/oauth/token'
     payload = {
         'client_id': client_id,
@@ -48,18 +49,29 @@ def callback():
         'grant_type': 'authorization_code'
     }
     response = requests.post(token_url, data=payload)
+    
+    # Contains four fields: token_type (Bearer), expires_at, expires_in, refresh_token, access_token, athlete
+    #     {
+    #   "token_type": "Bearer",
+    #   "expires_at": 1568775134,
+    #   "expires_in": 21600,
+    #   "refresh_token": "e5n567567...",
+    #   "access_token": "a4b945687g...",
+    #   "athlete": {
+    #     #{summary athlete representation}
+    #   }
+    # }
     response_data = response.json()
-    print(response_data)
-    print(response_data["access_token"])
+
     session['access_token'] = response_data['access_token']
     session['refresh_token'] = response_data['refresh_token']
+    
+    # Use access token to get information about athlete
     return redirect(url_for('profile'))
 
 @app.route('/profile')
 def profile():
-    print("Before print")
     print(session)
-    print("After print")
     access_token = session.get('access_token')
     if not access_token:
         return redirect(url_for('login'))
