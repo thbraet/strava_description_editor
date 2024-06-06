@@ -26,11 +26,11 @@ def show_user_profile(username):
 
 @app.route('/strava')
 def strava():
-    # Generate the authorization URL (replace with your actual implementation)
+    # The user will see a button that links to the authorization URL
+    # This URL will generate a Strava prompt to approva the app gets access for the specified scope
+    # If the user approves, they will get redirected to the redirect_uri, which is the /callback path in this case.
     authorization_url = f"https://www.strava.com/oauth/authorize?client_id={client_id}&redirect_uri={url_for('callback', _external=True)}&response_type=code&scope=read,activity:read_all"
     
-    print(authorization_url)
-
     return render_template('strava.html', authorization_url=authorization_url)
 
 @app.route('/callback')
