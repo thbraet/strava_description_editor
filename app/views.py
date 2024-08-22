@@ -10,9 +10,30 @@ main_bp = Blueprint('main', __name__)
 client_secret = os.getenv("STRAVA_CLIENT_SECRET")
 client_id = os.getenv("STRAVA_CLIENT_ID")
 
+
+@main_bp.route('/')
+def home():
+    return render_template('index.html', name="Thibauld")
+
+@main_bp.route('/about')
+def about():
+    return "This is the about page."
+
+@main_bp.route('/user/<username>')
+def show_user_profile(username):
+    return f"User {username}"
+
+
+
+
+
+
 def get_authenticated_user():
+    print(session)
     strava_id = session.get('strava_id')
+    print(strava_id)
     if not strava_id:
+        print("Redirect")
         return None, redirect(url_for('auth.strava'))
     user = User.query.filter_by(strava_id=strava_id).first()
     if not user:
@@ -27,17 +48,6 @@ def make_strava_request(url, user, method='GET', data=None):
         response = requests.put(url, headers=headers, data=data)
     return response
 
-@main_bp.route('/')
-def home():
-    return render_template('index.html', name="Thibauld")
-
-@main_bp.route('/about')
-def about():
-    return "This is the about page."
-
-@main_bp.route('/user/<username>')
-def show_user_profile(username):
-    return f"User {username}"
 
 @main_bp.route('/profile')
 def profile():
@@ -92,13 +102,11 @@ def store_activities():
 
     activities_data = response.json()
     for activity_data in activities_data:
-        activity_id = activity_data['id']
-        existing_activity = StravaActivity.query.filter_by(activity_id=activity_id).first()
-        if existing_activity:
+        if StravaActivity.query.filter_by(activity_id=activity_data['id']).first():
             continue
 
         new_activity = StravaActivity(
-            activity_id=activity_id,
+            activity_id=activity_data['id'],
             athlete_id=activity_data['athlete']['id'],
             name=activity_data['name'],
             start_date=datetime.strptime(activity_data['start_date'], '%Y-%m-%dT%H:%M:%SZ'),
@@ -107,8 +115,8 @@ def store_activities():
             total_elevation_gain=activity_data['total_elevation_gain'],
             type=activity_data['type'],
             sport_type=activity_data['sport_type'],
-            average_speed=activity_data.get('average_speed', None),
-            max_speed=activity_data.get('max_speed', None),
+            average_speed=activity_data.get('average_speed'),
+            max_speed=activity_data.get('max_speed'),
         )
         db.session.add(new_activity)
 

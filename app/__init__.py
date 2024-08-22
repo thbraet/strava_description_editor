@@ -7,6 +7,8 @@ from .views import main_bp
 from .auth import auth_bp
 from .admin import setup_admin
 from .webhooks import webhook_bp
+from flask_session import Session
+
 
 # a typical factory function in Flask, used to create and configure a new instance of the Flask application.
 def create_app():
@@ -16,6 +18,8 @@ def create_app():
 
     # Load configuration
     app.config.from_object('config.Config')
+    
+    Session(app)
 
     # Initialize the SQLAlchemy database extension with the Flask app
     # making the db object (imported from .models) aware of the app context.
@@ -35,19 +39,7 @@ def create_app():
         # ensures that all tables defined in your SQLAlchemy models are created in the database if they don't already exist.
         db.create_all()
         
-    foods_data = [
-    {"food": "Scoop of ice cream", "calories_per_serving_unit": 150, "emoji": "🍦"},
-    {"food": "Pizza slice", "calories_per_serving_unit": 300, "emoji": "🍕"},
-    {"food": "Donut", "calories_per_serving_unit": 250, "emoji": "🍩"},
-    {"food": "Regular beer", "calories_per_serving_unit": 150, "emoji": "🍺"}
-    ]
 
-
-    # # Insert the data into the table
-    # for data in foods_data:
-    #     food_entry = FoodCalories(**data)
-    #     db.session.add(food_entry)
-        
     # db.session.commmit()
 
     return app
