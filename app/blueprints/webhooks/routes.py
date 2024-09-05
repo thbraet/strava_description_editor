@@ -1,12 +1,8 @@
-import os
+from app.blueprints.get_activities.routes import get_activity_data, update_activity_visibility
+from . import webhook_bp
+from flask import request, jsonify
 import requests
-from flask import Blueprint, request, jsonify
-from .models import db, User
-
-webhook_bp = Blueprint('webhook', __name__)
-
-client_secret = os.getenv("STRAVA_CLIENT_SECRET")
-client_id = os.getenv("STRAVA_CLIENT_ID")
+from ..auth.models import User
 
 @webhook_bp.route('/subscription', methods=['GET'])
 def verify_subscription():
@@ -14,20 +10,6 @@ def verify_subscription():
     challenge = request.args.get('hub.challenge')
     return jsonify({'hub.challenge': challenge})
 
-def get_activity_data(activity_id, access_token):    
-    headers = {'Authorization': f'Bearer {access_token}'}
-    activity_url = f'https://www.strava.com/api/v3/activities/{activity_id}'
-    response = requests.get(activity_url, headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    return None
-
-def update_activity_visibility(activity_id, access_token, visibility):
-    headers = {'Authorization': f'Bearer {access_token}'}
-    activity_url = f'https://www.strava.com/api/v3/activities/{activity_id}'
-    update_payload = {'private': visibility}
-    response = requests.put(activity_url, headers=headers, json=update_payload)
-    return response.status_code == 200
 
 @webhook_bp.route('/subscription', methods=['POST'])
 def handle_webhook():

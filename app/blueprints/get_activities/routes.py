@@ -1,68 +1,28 @@
 from datetime import datetime
-import os
+from flask import jsonify, render_template, request
 import requests
-from flask import Blueprint, jsonify, render_template, request, session, url_for, redirect
-from .models import StravaActivity, db, User
-from .auth import auth_bp
 
-main_bp = Blueprint('main', __name__)
+from app.blueprints.auth.models import StravaActivity
+from app.blueprints.auth.routes import get_authenticated_user, make_strava_request
+from . import activities_bp
+from ...extensions import db
 
-client_secret = os.getenv("STRAVA_CLIENT_SECRET")
-client_id = os.getenv("STRAVA_CLIENT_ID")
+def get_activity_data(activity_id, access_token):    
+    headers = {'Authorization': f'Bearer {access_token}'}
+    activity_url = f'https://www.strava.com/api/v3/activities/{activity_id}'
+    response = requests.get(activity_url, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    return None
 
+def update_activity_visibility(activity_id, access_token, visibility):
+    headers = {'Authorization': f'Bearer {access_token}'}
+    activity_url = f'https://www.strava.com/api/v3/activities/{activity_id}'
+    update_payload = {'private': visibility}
+    response = requests.put(activity_url, headers=headers, json=update_payload)
+    return response.status_code == 200
 
-@main_bp.route('/')
-def home():
-    return render_template('index.html', name="Thibauld")
-
-@main_bp.route('/about')
-def about():
-    return "This is the about page."
-
-@main_bp.route('/user/<username>')
-def show_user_profile(username):
-    return f"User {username}"
-
-
-
-
-
-
-def get_authenticated_user():
-    print(session)
-    strava_id = session.get('strava_id')
-    print(strava_id)
-    if not strava_id:
-        print("Redirect")
-        return None, redirect(url_for('auth.strava'))
-    user = User.query.filter_by(strava_id=strava_id).first()
-    if not user:
-        return None, redirect(url_for('auth.strava'))
-    return user, None
-
-def make_strava_request(url, user, method='GET', data=None):
-    headers = {'Authorization': f'Bearer {user.access_token}'}
-    if method == 'GET':
-        response = requests.get(url, headers=headers)
-    elif method == 'PUT':
-        response = requests.put(url, headers=headers, data=data)
-    return response
-
-
-@main_bp.route('/profile')
-def profile():
-    user, redirect_response = get_authenticated_user()
-    if redirect_response:
-        return redirect_response
-
-    response = make_strava_request('https://www.strava.com/api/v3/athlete', user)
-    if response.status_code != 200:
-        return "Failed to retrieve profile information."
-
-    profile_data = response.json()
-    return f"Hello, {profile_data['firstname']} {profile_data['lastname']}!"
-
-@main_bp.route('/update_activity', methods=['GET', 'POST'])
+@activities_bp.route('/update_activity', methods=['GET', 'POST'])
 def update_activity():
     if request.method != 'POST':
         return render_template('update_activity.html')
@@ -89,7 +49,7 @@ def update_activity():
 
     return "Activity description updated successfully!"
 
-@main_bp.route('/store_activities', methods=['GET'])
+@activities_bp.route('/store_activities', methods=['GET'])
 def store_activities():
     user, redirect_response = get_authenticated_user()
     if redirect_response:
