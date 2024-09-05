@@ -5,11 +5,12 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy #  an extension for Flask that adds support for SQLAlchemy, a popular Object Relational Mapper (ORM) for Python. SQLAlchemy allows you to interact with databases using Python classes instead of writing raw SQL queries.
 from flask_admin import Admin # a Flask extension that adds an administrative interface to your application. It allows you to manage your database content, users, and other aspects of the application via a web-based interface.
-from .models import FoodCalories, db # db is the SQLAlchemy database instance.
-from .views import main_bp
-from .auth import auth_bp
+from .extensions import db # db is the SQLAlchemy database instance.
+from .blueprints.home import home_bp
+from .blueprints.auth import auth_bp
+from .blueprints.webhooks import webhook_bp
+from .blueprints.get_activities import activities_bp
 from .admin import setup_admin
-from .webhooks import webhook_bp
 from flask_session import Session
 
 
@@ -40,9 +41,10 @@ def create_app():
 
     # REGISTER BLUEPRINTS
     # this separates different parts of the application (like authentication, main views, and webhooks) for better organization.
-    app.register_blueprint(main_bp)
+    app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(webhook_bp, url_prefix='/webhook')
+    app.register_blueprint(activities_bp)
 
     # Create database tables
     with app.app_context():

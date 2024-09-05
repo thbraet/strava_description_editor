@@ -1,14 +1,10 @@
-import os
-from flask import Blueprint, redirect, render_template, request, session, url_for
+from flask import redirect, render_template, request, session, url_for
+
 import requests
-from app.models import StravaActivity, db, User
 
-
-auth_bp = Blueprint('auth', __name__)
-
-# Retrieve Strava client credentials from environment variables
-client_secret = os.getenv("STRAVA_CLIENT_SECRET")
-client_id = os.getenv("STRAVA_CLIENT_ID")
+from .models import User
+from ...extensions import db
+from . import auth_bp, client_id, client_secret
 
 @auth_bp.route('/strava')
 def strava():
@@ -78,4 +74,38 @@ def callback():
     session['strava_id'] = strava_id
 
     # Redirect the user to the profile page
-    return redirect(url_for('main.profile'))
+    return redirect(url_for('auth.profile'))
+
+def get_authenticated_user():
+    print(session)
+    strava_id = session.get('strava_id')
+    print(strava_id)
+    if not strava_id:
+        print("Redirect")
+        return None, redirect(url_for('auth.strava'))
+    user = User.query.filter_by(strava_id=strava_id).first()
+    if not user:
+        return None, redirect(url_for('auth.strava'))
+    return user, None
+
+def make_strava_request(url, user, method='GET', data=None):
+    headers = {'Authorization': f'Bearer {user.access_token}'}
+    if method == 'GET':
+        response = requests.get(url, headers=headers)
+    elif method == 'PUT':
+        response = requests.put(url, headers=headers, data=data)
+    return response
+
+
+@auth_bp.route('/profile')
+def profile():
+    user, redirect_response = get_authenticated_user()
+    if redirect_response:
+        return redirect_response
+
+    response = make_strava_request('https://www.strava.com/api/v3/athlete', user)
+    if response.status_code != 200:
+        return "Failed to retrieve profile information."
+
+    profile_data = response.json()
+    return f"Hello, {profile_data['firstname']} {profile_data['lastname']}!"
