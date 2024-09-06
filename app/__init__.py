@@ -24,9 +24,9 @@ def create_app(config_name='default'):
     #GENERAL CONFIGURATION
     # Load configuration
     if config_name == 'testing':
-        app.config.from_object('config.Config')
-    else:
         app.config.from_object('config.TestingConfig')
+    else:
+        app.config.from_object('config.Config')
     
     # SESSION INITIALIZATION
     # The Session class integrates server-side session storage into Flask.
