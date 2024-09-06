@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
 
-from app.blueprints.get_activities.routes import longest_streak
+from app.blueprints.streak.routes import longest_streak
 
 @pytest.mark.parametrize(
     "dates, expected",
