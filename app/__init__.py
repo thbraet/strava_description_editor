@@ -10,6 +10,7 @@ from .blueprints.home import home_bp
 from .blueprints.auth import auth_bp
 from .blueprints.webhooks import webhook_bp
 from .blueprints.get_activities import activities_bp
+from .blueprints.streak import streak_bp
 from .admin import setup_admin
 from flask_session import Session
 
@@ -48,6 +49,7 @@ def create_app(config_name='default'):
     app.register_blueprint(auth_bp)
     app.register_blueprint(webhook_bp, url_prefix='/webhook')
     app.register_blueprint(activities_bp)
+    app.register_blueprint(streak_bp)
 
     # Create database tables
     with app.app_context():
