@@ -13,3 +13,8 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
     SESSION_PERMANENT = False
     SESSION_USE_SIGNER = True
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # In-memory database for tests
+    WTF_CSRF_ENABLED = False  # Disable CSRF for easier testing

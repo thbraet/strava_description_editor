@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import jsonify, render_template, request
 import requests
 
-from app.blueprints.auth.models import StravaActivity
+from app.models.models import StravaActivity
 from app.blueprints.auth.routes import get_authenticated_user, make_strava_request
 from . import activities_bp
 from ...extensions import db
@@ -82,3 +82,41 @@ def store_activities():
 
     db.session.commit()
     return jsonify({'message': 'Activities stored successfully'}), 200
+
+def get_activity_dates():
+    # Query all activity dates ordered by date
+    activities = StravaActivity.query.order_by(StravaActivity.start_date.asc()).all()
+
+    return [activity.start_date for activity in activities]
+
+def longest_streak(dates):
+    if not dates:
+        return 0
+    
+    dates = sorted(dates, reverse=False)
+
+    longest_streak = 0
+    current_streak = 1
+
+    # Loop through the list of dates and compare each date with the previous one
+    for i in range(1, len(dates)):
+        if dates[i-1].date() + timedelta(days = 1) == dates[i].date():
+            current_streak +=1
+        elif dates[i-1].date() == dates[i].date():
+            current_streak += 0
+        else:
+            # If it's not consecutive, update the longest streak if necessary and reset current streak
+            longest_streak = max(longest_streak, current_streak)
+            current_streak = 1
+
+    return max(longest_streak, current_streak)
+
+@activities_bp.route('/longest_streak')
+def calculate_longest_streak():
+    # Fetch the activity dates from the database
+    activity_dates = get_activity_dates()
+        
+    # Calculate the longest streak of consecutive days
+    streak = longest_streak(activity_dates)
+    
+    return f"The longest streak of consecutive days with activities is: {streak} days"

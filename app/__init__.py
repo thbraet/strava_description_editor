@@ -16,14 +16,17 @@ from flask_session import Session
 
 # a typical factory function in Flask, used to create and configure a new instance of the Flask application.
 # webA factory function is a function that is responsible for creating and returning instances of a class or an object.
-def create_app():
+def create_app(config_name='default'):
     
     # Create new Flask app instance
     app = Flask(__name__)
 
     #GENERAL CONFIGURATION
     # Load configuration
-    app.config.from_object('config.Config')
+    if config_name == 'testing':
+        app.config.from_object('config.Config')
+    else:
+        app.config.from_object('config.TestingConfig')
     
     # SESSION INITIALIZATION
     # The Session class integrates server-side session storage into Flask.

@@ -2,7 +2,7 @@ from flask import redirect, render_template, request, session, url_for
 
 import requests
 
-from .models import User
+from ...models.models import User
 from ...extensions import db
 from . import auth_bp, client_id, client_secret
 

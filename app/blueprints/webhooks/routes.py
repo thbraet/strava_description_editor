@@ -2,7 +2,7 @@ from app.blueprints.get_activities.routes import get_activity_data, update_activ
 from . import webhook_bp
 from flask import request, jsonify
 import requests
-from ..auth.models import User
+from ...models.models import User
 
 @webhook_bp.route('/subscription', methods=['GET'])
 def verify_subscription():

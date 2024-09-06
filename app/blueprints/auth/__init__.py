@@ -1,6 +1,6 @@
 import os
 from flask import Blueprint
-from .models import StravaActivity, db, User
+from ...models.models import StravaActivity, db, User
 
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
