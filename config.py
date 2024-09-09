@@ -11,7 +11,7 @@ class Config:
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
-    SESSION_PERMANENT = False
+    SESSION_PERMANENT = True
     SESSION_USE_SIGNER = True
 
 class TestingConfig(Config):
