@@ -2,7 +2,7 @@
 # The code in the __init__.py file is executed when the package or one of its modules is imported.
 
 import os
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy #  an extension for Flask that adds support for SQLAlchemy, a popular Object Relational Mapper (ORM) for Python. SQLAlchemy allows you to interact with databases using Python classes instead of writing raw SQL queries.
 from flask_admin import Admin # a Flask extension that adds an administrative interface to your application. It allows you to manage your database content, users, and other aspects of the application via a web-based interface.
 from .extensions import db # db is the SQLAlchemy database instance.
@@ -33,6 +33,8 @@ def create_app(config_name='default'):
     # The Session class integrates server-side session storage into Flask.
     # initializes the session system in the Flask app.
     Session(app)
+    
+    
 
     # DATABASE INITIALIZATION
     # Initialize the SQLAlchemy database extension with the Flask app

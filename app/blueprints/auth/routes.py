@@ -1,5 +1,5 @@
-from flask import redirect, render_template, request, session, url_for
-
+from flask import  redirect, render_template, request, session, url_for
+import logging
 import requests
 
 from ...models.models import User
@@ -76,9 +76,19 @@ def callback():
     # Commit the transaction to save the changes to the database
     db.session.commit()
     
+    
+    # Log the session ID and data
+    print(f'Session ID: {session.sid if hasattr(session, "sid") else "No SID"}')
+    
+    print(f'Session Data: {dict(session)}')
+    
+    # logging.debug(f'Session ID: {session.sid if hasattr(session, "sid") else "No SID"}')
+    # logging.debug(f'Session Data: {dict(session)}')
+
+
     # Store the Strava ID in the session for later use
     session['strava_id'] = strava_id
-
+    
     # Redirect the user to the profile page
     return redirect(url_for('auth.profile'))
 
