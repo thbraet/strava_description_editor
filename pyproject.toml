@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "strava_description_editor"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.12"
 flask = "^3.0.3"
 requests = "^2.32.3"
 pytest = "^8.2.2"
@@ -16,7 +16,7 @@ flask-admin = "^1.6.1"
 python-dotenv = "^1.0.1"
 flask-session = "^0.8.0"
 redis = "^5.0.8"
-
+seaborn = "^0.13.2"
 
 [build-system]
 requires = ["poetry-core"]
