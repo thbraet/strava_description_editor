@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Thibauld Braet <thibauld@live.be>"]
 readme = "README.md"
-packages = [{include = "strava_description_editor"}]
+packages = [{include = "app"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -12,7 +12,7 @@ flask = "^3.0.3"
 requests = "^2.32.3"
 pytest = "^8.2.2"
 flask-sqlalchemy = "^3.1.1"
-flask-admin = "^1.6.1"
+flask-admin = "^2.0.0a0"
 python-dotenv = "^1.0.1"
 flask-session = "^0.8.0"
 redis = "^5.0.8"

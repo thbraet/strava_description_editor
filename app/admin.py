@@ -6,7 +6,7 @@ from .models.models import FoodCalories, User, StravaActivity
 def setup_admin(app):
     
     # Create instance of Admin class
-    admin = Admin(app, name='Strava App Admin', template_mode='bootstrap3')
+    admin = Admin(app, name='Strava App Admin')
     
     # Add model views
     admin.add_view(ModelView(User, db.session))
