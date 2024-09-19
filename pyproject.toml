@@ -17,6 +17,7 @@ python-dotenv = "^1.0.1"
 flask-session = "^0.8.0"
 redis = "^5.0.8"
 seaborn = "^0.13.2"
+stravavis = "^0.4.0"
 
 [build-system]
 requires = ["poetry-core"]
