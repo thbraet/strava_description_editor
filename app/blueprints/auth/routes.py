@@ -117,7 +117,7 @@ def get_authenticated_user():
     # Return the user and None (indicating no redirect is needed)
     return user, None
 
-def make_strava_request(url, user, method='GET', data=None):
+def make_strava_request(url, user, method='GET', data=None, params=None):
     """
     Make a request to the Strava API using the access token of the authenticated user.
     """
@@ -126,12 +126,13 @@ def make_strava_request(url, user, method='GET', data=None):
     
     # Make the request based on the specified HTTP method
     if method == 'GET':
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, params=params)
     elif method == 'PUT':
         response = requests.put(url, headers=headers, data=data)
     
     # Return the response object
     return response
+
 
 
 
