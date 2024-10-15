@@ -3,8 +3,6 @@ import requests
 
 
 # Replace these with your actual Client ID and Client Secret
-# client_id = 'your_client_id'
-# client_secret = 'your_client_secret'
 client_secret = os.getenv("STRAVA_CLIENT_SECRET")
 client_id = os.getenv("STRAVA_CLIENT_ID")
 

@@ -2,7 +2,7 @@ import os
 import requests
 
 
-subscription_id = 259375
+subscription_id = 266149
 client_secret = os.getenv("STRAVA_CLIENT_SECRET")
 client_id = os.getenv("STRAVA_CLIENT_ID")
 

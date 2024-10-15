@@ -48,7 +48,7 @@ def create_app(config_name='default'):
     # this separates different parts of the application (like authentication, main views, and webhooks) for better organization.
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp)
-    app.register_blueprint(webhook_bp, url_prefix='/webhook')
+    app.register_blueprint(webhook_bp)
     app.register_blueprint(activities_bp)
     app.register_blueprint(streak_bp)
     app.register_blueprint(charts_bp)

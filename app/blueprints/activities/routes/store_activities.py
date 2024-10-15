@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask import jsonify
 
-from ...auth.functions import get_authenticated_user
-from ...auth.functions import make_strava_request
+from ...auth.functions.get_authenticated_user import get_authenticated_user
+from ...auth.functions.make_strava_request import make_strava_request
 from ....models.models import StravaActivity, db
 
 from .. import activities_bp
