@@ -1,17 +1,5 @@
 from datetime import timedelta
-from app.models.models import StravaActivity
-from . import streak_bp
 
-
-def get_activity_dates():
-    """
-    Retrieves all activity start dates from the database, ordered by date.
-    """
-    # Query all activities ordered by start date
-    activities = StravaActivity.query.order_by(StravaActivity.start_date.asc()).all()
-
-    # Return a list of start dates
-    return [activity.start_date for activity in activities]
 
 def longest_streak(dates):
     """
@@ -40,17 +28,3 @@ def longest_streak(dates):
 
     # Return the longest streak, considering the last streak in the list
     return max(longest_streak, current_streak)
-
-@streak_bp.route('/longest_streak')
-def calculate_longest_streak():
-    """
-    Calculates and returns the longest streak of consecutive days with activities.
-    """
-    # Fetch the activity dates from the database
-    activity_dates = get_activity_dates()
-        
-    # Calculate the longest streak of consecutive days with activities
-    streak = longest_streak(activity_dates)
-    
-    # Return a message with the longest streak in days
-    return f"The longest streak of consecutive days with activities is: {streak} days"

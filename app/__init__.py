@@ -9,7 +9,7 @@ from .extensions import db # db is the SQLAlchemy database instance.
 from .blueprints.home import home_bp
 from .blueprints.auth import auth_bp
 from .blueprints.webhooks import webhook_bp
-from .blueprints.get_activities import activities_bp
+from .blueprints.activities import activities_bp
 from .blueprints.streak import streak_bp
 from .blueprints.charts import charts_bp
 from .admin import setup_admin
@@ -35,15 +35,13 @@ def create_app(config_name='default'):
     # initializes the session system in the Flask app.
     Session(app)
     
-    
-
     # DATABASE INITIALIZATION
     # Initialize the SQLAlchemy database extension with the Flask app
     # making the db object (imported from .models) aware of the app context.
     db.init_app(app)
     
     # ADMIN INITIALIZATION
-     # Initialize Flask-Admin and set it up with the Flask app
+    # Initialize Flask-Admin and set it up with the Flask app
     setup_admin(app)
 
     # REGISTER BLUEPRINTS

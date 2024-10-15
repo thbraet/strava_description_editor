@@ -1,8 +1,9 @@
-from app.blueprints.get_activities.routes import get_activity_data, update_activity_visibility
-from . import webhook_bp
-from flask import request, jsonify
-import requests
-from ...models.models import User
+
+from flask import jsonify, request
+
+from .. import webhook_bp
+from ....models.models import User
+from ...activities.functions import get_activity_data, update_activity_visibility
 
 @webhook_bp.route('/subscription', methods=['GET'])
 def verify_subscription():
@@ -36,4 +37,3 @@ def handle_webhook():
             return jsonify({'status': 'error', 'message': 'Failed to update activity visibility'}), 400
 
     return jsonify({'status': 'ignored'}), 200
-

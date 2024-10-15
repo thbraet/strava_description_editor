@@ -1,6 +1,5 @@
 import os
 from flask import Blueprint
-from ...models.models import StravaActivity, db, User
 
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
@@ -9,4 +8,4 @@ auth_bp = Blueprint('auth', __name__, template_folder='templates')
 client_secret = os.getenv("STRAVA_CLIENT_SECRET")
 client_id = os.getenv("STRAVA_CLIENT_ID")
 
-from . import routes
+from .routes import callback, profile, strava
