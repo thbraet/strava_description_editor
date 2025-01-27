@@ -10,8 +10,3 @@ app = create_app()
 if __name__ == '__main__': 
     # Run app in debug mode to collect logs
     app.run(debug=True) 
-    
-    # Log the session ID and data
-    print(f'Session ID: {session.sid if hasattr(session, "sid") else "No SID"}')
-
-    print(f'Session Data: {dict(session)}')

@@ -162,3 +162,4 @@ flask_sessions
 
 # Don't store images
 *.png
+migrations

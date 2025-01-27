@@ -19,6 +19,7 @@ redis = "^5.0.8"
 seaborn = "^0.13.2"
 stravavis = "^0.4.0"
 psycopg2-binary = "^2.9.9"
+flask-migrate = "^4.0.7"
 
 [build-system]
 requires = ["poetry-core"]
