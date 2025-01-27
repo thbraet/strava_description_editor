@@ -8,4 +8,4 @@ auth_bp = Blueprint('auth', __name__, template_folder='templates')
 client_secret = os.getenv("STRAVA_CLIENT_SECRET")
 client_id = os.getenv("STRAVA_CLIENT_ID")
 
-from .routes import callback, profile, strava
+from .routes import callback, strava

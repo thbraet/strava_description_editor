@@ -2,9 +2,10 @@
 from flask import  redirect, request, session, url_for
 import requests
 
-from ....models.models import User
-from ....extensions import db
+from ....models.strava.user_tokens import UserTokens, create_user_tokens, update_user_tokens
 
+from ....extensions import db
+from ....models.strava.detailed_athlete import DetailedAthlete, create_detailed_athlete, update_detailed_athlete
 
 from .. import auth_bp, client_id, client_secret
 
@@ -21,7 +22,39 @@ def callback():
     # If no code is provided, return an authorization failure message
     if not code:
         return "Authorization failed."
+    
+    next_url = request.args.get('state')
+    
+    response_data = exchange_code_for_access_token(code)  
 
+    # Store the Strava ID in the session for later use
+    athlete_id = response_data.get('athlete').get('id')
+    session['athlete_id'] = athlete_id
+
+    # Check if the athlete already exists in the database by their Strava ID
+    detailed_athlete = DetailedAthlete.query.filter_by(id=athlete_id).first()
+    
+    if detailed_athlete:
+        detailed_athlete = update_detailed_athlete(detailed_athlete, response_data.get('athlete'))
+    
+    else:
+        detailed_athlete  = create_detailed_athlete(response_data.get('athlete'))
+        
+    
+    # Check if the user's tokens already exist
+    user_tokens = UserTokens.query.filter_by(athlete_id=athlete_id).first()
+    
+    if user_tokens:
+        user_tokens = update_user_tokens(user_tokens, response_data)
+    else:
+        user_tokens = create_user_tokens(response_data)
+    
+    # return redirect(url_for('home.profile'))
+    return redirect(next_url)
+    
+   
+
+def exchange_code_for_access_token(code):
     # URL to request an access token from Strava
     token_url = 'https://www.strava.com/oauth/token'
     
@@ -36,47 +69,7 @@ def callback():
     # Send a POST request to Strava to exchange the authorization code for an access token
     response = requests.post(token_url, data=payload)
 
-    # Check if the request was successful (status code 200)
-    if response.status_code != 200:
-        return "Failed to retrieve access token."
-
     # Parse the JSON response to get access token and user details
     response_data = response.json()
-    strava_id = response_data['athlete']['id']
     
-    # Check if the user already exists in the database by their Strava ID
-    if user := User.query.filter_by(strava_id=strava_id).first():
-        # Update the existing user's access token, refresh token, and expiration time
-        user.access_token = response_data['access_token']
-        user.refresh_token = response_data['refresh_token']
-        user.expires_at = response_data['expires_at']
-
-    else:
-        # Create a new user record if the user does not exist
-        user = User(
-            strava_id=strava_id,
-            access_token=response_data['access_token'],
-            refresh_token=response_data['refresh_token'],
-            expires_at=response_data['expires_at']
-        )
-        # Add the new user to the database session
-        db.session.add(user)
-        
-    # Commit the transaction to save the changes to the database
-    db.session.commit()
-    
-    
-    # Log the session ID and data
-    print(f'Session ID: {session.sid if hasattr(session, "sid") else "No SID"}')
-    
-    print(f'Session Data: {dict(session)}')
-    
-    # logging.debug(f'Session ID: {session.sid if hasattr(session, "sid") else "No SID"}')
-    # logging.debug(f'Session Data: {dict(session)}')
-
-
-    # Store the Strava ID in the session for later use
-    session['strava_id'] = strava_id
-    
-    # Redirect the user to the profile page
-    return redirect(url_for('auth.profile'))
+    return response_data

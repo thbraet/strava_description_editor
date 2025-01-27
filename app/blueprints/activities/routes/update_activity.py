@@ -1,12 +1,15 @@
 from flask import render_template, request
 
-from ...auth.functions.get_authenticated_user import get_authenticated_user
+from ....blueprints.auth.functions.login_required import login_required
+
+from ...auth.functions.get_session_user import get_session_user
 from ...auth.functions.make_strava_request import make_strava_request
 
 from .. import activities_bp
 
 
 @activities_bp.route('/update_activity', methods=['GET', 'POST'])
+@login_required(next_url='activities.update_activity')
 def update_activity():
     """
     Renders a form for updating an activity's description or handles form submission
@@ -23,7 +26,7 @@ def update_activity():
     activity_id = activity_url.split('/')[-1]
 
     # Retrieve the authenticated user; redirect to Strava authorization if not authenticated
-    user, redirect_response = get_authenticated_user()
+    user, redirect_response = get_session_user()
     if redirect_response:
         return redirect_response
 

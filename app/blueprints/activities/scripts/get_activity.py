@@ -1,0 +1,3 @@
+from app.blueprints.activities.functions.get_activity_data import get_activity_data
+
+get_activity_data(12670507732)

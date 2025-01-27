@@ -1,7 +1,7 @@
 from flask import render_template
 from ..functions.get_activities_dataframe import get_activities_dataframe
 from ..functions.plot_calendar import plot_calendar
-from ...auth.functions import get_authenticated_user
+from ...auth.functions import get_session_user
 from .. import charts_bp
 
 
@@ -12,7 +12,7 @@ def calendar():
     Clicking the button redirects the user to Strava's authorization page.
     """
     # Construct the URL for Strava's authorization endpoint
-    user, redirect_response = get_authenticated_user()
+    user, redirect_response = get_session_user()
     if redirect_response:
         return redirect_response
 

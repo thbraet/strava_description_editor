@@ -1,51 +1,60 @@
-# When a directory contains an __init__.py file, Python treats the directory as a package.
-# The code in the __init__.py file is executed when the package or one of its modules is imported.
+from flask import Flask
 
-import os
-from flask import Flask, session
-from flask_sqlalchemy import SQLAlchemy #  an extension for Flask that adds support for SQLAlchemy, a popular Object Relational Mapper (ORM) for Python. SQLAlchemy allows you to interact with databases using Python classes instead of writing raw SQL queries.
-from flask_admin import Admin # a Flask extension that adds an administrative interface to your application. It allows you to manage your database content, users, and other aspects of the application via a web-based interface.
-from .extensions import db # db is the SQLAlchemy database instance.
+# Import models
+from app.models.strava.detailed_athlete import DetailedAthlete
+from .models.strava.user_tokens import UserTokens
+
+# Import Flask-Admin
+from flask_admin import Admin
+
+# Import additional models and extensions
+from .models.strava.detailed_activity import DetailedActivity 
+from .extensions import db 
 from .blueprints.home import home_bp
 from .blueprints.auth import auth_bp
 from .blueprints.webhooks import webhook_bp
 from .blueprints.activities import activities_bp
 from .blueprints.streak import streak_bp
 from .blueprints.charts import charts_bp
-from .admin import setup_admin
 from flask_session import Session
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
-
-# a typical factory function in Flask, used to create and configure a new instance of the Flask application.
-# webA factory function is a function that is responsible for creating and returning instances of a class or an object.
 def create_app(config_name='default'):
+    """
+    Create and configure the Flask application.
+
+    Args:
+        config_name (str): The configuration name to use. Defaults to 'default'.
+
+    Returns:
+        Flask: The configured Flask application instance.
+    """
     
     # Create new Flask app instance
     app = Flask(__name__)
 
-    #GENERAL CONFIGURATION
-    # Load configuration
+    # Load configuration based on the provided config_name
     if config_name == 'testing':
         app.config.from_object('config.TestingConfig')
     else:
         app.config.from_object('config.Config')
     
-    # SESSION INITIALIZATION
-    # The Session class integrates server-side session storage into Flask.
-    # initializes the session system in the Flask app.
+    # Initialize Flask-Session
     Session(app)
     
-    # DATABASE INITIALIZATION
-    # Initialize the SQLAlchemy database extension with the Flask app
-    # making the db object (imported from .models) aware of the app context.
+    # Initialize SQLAlchemy with the app
     db.init_app(app)
-    
-    # ADMIN INITIALIZATION
-    # Initialize Flask-Admin and set it up with the Flask app
-    setup_admin(app)
 
-    # REGISTER BLUEPRINTS
-    # this separates different parts of the application (like authentication, main views, and webhooks) for better organization.
+    # Initialize Flask-Admin
+    admin = Admin(app, name='Strava App Admin')
+    
+    # Add views to Flask-Admin for managing UserTokens, DetailedActivity, and DetailedAthlete models
+    admin.add_view(ModelView(UserTokens, db.session))
+    admin.add_view(ModelView(DetailedActivity, db.session))
+    admin.add_view(ModelView(DetailedAthlete, db.session))
+
+    # Register blueprints for different parts of the application
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(webhook_bp)
@@ -53,12 +62,8 @@ def create_app(config_name='default'):
     app.register_blueprint(streak_bp)
     app.register_blueprint(charts_bp)
 
-    # Create database tables
+    # Create all database tables within the app context
     with app.app_context():
-        # ensures that all tables defined in your SQLAlchemy models are created in the database if they don't already exist.
         db.create_all()
-        
-
-    # db.session.commmit()
 
     return app

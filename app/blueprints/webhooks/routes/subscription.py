@@ -1,8 +1,9 @@
 from flask import jsonify, request
 import logging
 
+from ....models.strava.user_tokens import UserTokens
+
 from .. import webhook_bp
-from ....models.models import User
 from ...activities.functions.get_activity_data import get_activity_data
 from ...activities.functions.update_activity_visibility import update_activity_visibility
 from ..functions.check_visibility import check_visibility
@@ -30,7 +31,7 @@ def handle_webhook() -> jsonify:
         logger.info("Ignored event: not an activity")
         return jsonify({'status': 'ignored'}), 200
 
-    user = User.query.filter_by(strava_id=owner_id).first()
+    user = UserTokens.query.filter_by(strava_id=owner_id).first()
     if not user:
         logger.info("Ignored event: user not found")
         return jsonify({'status': 'ignored'}), 200

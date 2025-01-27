@@ -4,10 +4,5 @@ from .. import home_bp
 
 
 @home_bp.route('/')
-def home():
-    # Log the session ID and data
-    print(f'Session ID: {session.sid if hasattr(session, "sid") else "No SID"}')
-
-    print(f'Session Data: {dict(session)}')
-    
+def home():    
     return render_template('index.html', name="<INSERT NAME>")
