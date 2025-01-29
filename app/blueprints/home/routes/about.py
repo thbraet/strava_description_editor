@@ -1,4 +1,4 @@
-from .. import home_bp
+from app.blueprints.home import home_bp
 
 
 @home_bp.route('/about')
