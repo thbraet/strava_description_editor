@@ -55,7 +55,7 @@ def create_app(config_name='default'):
     admin.add_view(ModelView(DetailedAthlete, db.session))
 
     # Register blueprints for different parts of the application
-    app.register_blueprint(home_bp)
+    app.register_blueprint(home_bp, url_prefix='sports/strava_description_editor')
     app.register_blueprint(auth_bp)
     app.register_blueprint(webhook_bp)
     app.register_blueprint(activities_bp)
